@@ -8,6 +8,7 @@ def load_map(map_name):
 
 """
 Rtype 방법
+"""
 map_name = "data/data_Rtype.pickle"
 N = 25  # 수요지 수, 차고지 제외
 M = 4  # 차량 최대 수
@@ -16,12 +17,11 @@ s = [0] + [1] * N  # 서비스 시간
 D = np.array([0] + [5] * N) # 수요량
 map_ = load_map(map_name)  # map, 인덱스 0은 차고지
 time_mode = 3  # setTime에 쓰이는 변수
-"""
+
 
 
 """
 C-type 방법
-"""
 map_name = "data/data_Ctype.pickle"
 N = 25  # 수요지 수, 차고지 제외
 M = 5  # 차량 최대 수
@@ -30,6 +30,7 @@ s = [0] + [1] * N  # 서비스 시간
 D = np.array([0] + [5] * N) # 수요량
 map_ = load_map(map_name)  # map, 인덱스 0은 차고지
 time_mode = 3  # setTime에 쓰이는 변수
+"""
 
 """
 검증 실험

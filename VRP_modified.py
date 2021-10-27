@@ -51,9 +51,9 @@ def get_fitness(chromosome):
     if not temp_ga.check_condition: return 9999999
 
     """
-    fitness_mode = 0 : time_array를 전부 가져온 다음 사용
-    fitness_mode = n : time_array를 generation % fitness_mode == 0일때마다 업테이트 하여 사용
-    fitness_mode = -n : generation이 n보다 크면 mode 바꿈
+    fitness_mode = 0 : 방법1
+    fitness_mode = n : 방법 2, n = interval
+    fitness_mode = -n : 방법 3, n = benchmark
     """
 
     fitness = 0
@@ -87,7 +87,6 @@ def get_fitness(chromosome):
                         time_arr3[i][j] = d
                         time_arr3[j][i] = d
                 fitness += np.sum(time_arr3 * temp_ga.x[:, :, m])
-                fitness += np.sum(temp_ga.s)
 
             else:
                 fitness += np.sum(ga.time_arr * temp_ga.x[:, :, m])
@@ -127,7 +126,7 @@ def prior_condition_check():
     print("map_name :", map_name)
     print("BASIC_DISTANCE_MODE :", BASIC_DISTANCE_MODE)
     print("OPTIONAL_DISTANCE_MODE :", OPTIONAL_DISTANCE_MODE)
-    print("Please check get_distance func and method")
+    print("Please check get_distance func")
     description = "N{0} M{1} C{2} {3} BASIC{4} OPTIONAL{5}".format(N, M, C, map_name, BASIC_DISTANCE_MODE,
                                                                    OPTIONAL_DISTANCE_MODE)
     description += " method3, generation_goal = 500, population_size = 20"
@@ -137,14 +136,18 @@ def prior_condition_check():
     check = input("Run? (Y/N) : ")
     if check == 'Y' or check == 'y':
         return description
-    else: raise Exception('repair parameter')
+    else: raise Exception("repair parameter")
 
 
 SAVE_FILE = "result/Ctype_method3.pickle"
 time_arr3 = np.zeros((N+1, N+1))
 count_mode3 = 0
 BASIC_DISTANCE_MODE = 2
-OPTIONAL_DISTANCE_MODE = 4
+if map_name == "data/data_Rtype.pickle":
+    OPTIONAL_DISTANCE_MODE = 3
+elif map_name == 'data/data_Ctype.pickle':
+    OPTIONAL_DISTANCE_MODE = 4
+
 
 time_list = []
 fitness_list = []
@@ -164,19 +167,21 @@ if __name__ == "__main__":
         ga.evolve(500)
         t2 = time.time()
 
-        fitness_mode = 1
         print('mode :', mode)
+        count_mode3 = int(len(np.where(time_arr3 != 0)[0]) / 2)
         print('count_mode3 :', count_mode3)
         count_mode3_list.append(count_mode3)
-        """
-        print('time :', t2 - t1 + count_mode3 * 0.3)
-        time_list.append(t2 - t1 + count_mode3 * 0.3)
-        """
 
-        dt = utill.caculate_running_time(time_arr3, ga.time_arr)
-        print('time :', t2 - t1 + dt)
-        time_list.append(t2 - t1 + dt)
 
+        if map_name == "data/data_Rtype.pickle":
+            delta_time = t2 - t1 + 0.3 * count_mode3
+        elif map_name == 'data/data_Ctype.pickle':
+            delta_time = utill.caculate_running_time(time_arr3, ga.time_arr)
+
+        print('time :', t2 - t1 + delta_time)
+        time_list.append(t2 - t1 + delta_time)
+
+        fitness_mode = 1
         for chromosome in ga.population:
             chromosome.fitness = ga.fitness_function_impl(chromosome)
 

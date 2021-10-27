@@ -52,9 +52,9 @@ def get_fitness(chromosome):
     if not temp_ga.check_condition: return 9999999
 
     """
-    fitness_mode = 0 : time_array를 전부 가져온 다음 사용
-    fitness_mode = n : time_array를 generation % fitness_mode == 0일때마다 업테이트 하여 사용
-    fitness_mode = -n : generation이 n보다 크면 mode 바꿈
+    fitness_mode = 0 : 방법1
+    fitness_mode = n : 방법 2, n = interval
+    fitness_mode = -n : 방법 3, n = benchmark
     """
 
     fitness = 0
@@ -129,15 +129,22 @@ def prior_condition_check():
     print("BASIC_DISTANCE_MODE :", BASIC_DISTANCE_MODE)
     print("OPTIONAL_DISTANCE_MODE :", OPTIONAL_DISTANCE_MODE)
     print("Please check get_distance func")
+    description = "N{0} M{1} C{2} {3} BASIC{4} OPTIONAL{5}".format(N, M, C, map_name, BASIC_DISTANCE_MODE,
+                                                                   OPTIONAL_DISTANCE_MODE)
+    description += " method3, generation_goal = 500, population_size = 20"
+    description += "\n0번인덱스 : description, 1번 인덱스 : 걸린 시간 리스트(float), 2번 인덱스 : 간격에 따른 최적"
+    description += " fitness list 3번 인덱스 : count_mode3_list"
+    print(description)
     check = input("Run? (Y/N) : ")
-    return check == 'Y' or check == 'y'
+    if check == 'Y' or check == 'y':
+        return description
+    else: raise Exception("repair parameter")
 
-
-SAVE_FILE = "result/Ctype_method4.pickle"
+SAVE_FILE = "result/Rtype_method4.pickle"
 time_arr3 = np.zeros((N+1, N+1))
 count_mode3 = 0
 BASIC_DISTANCE_MODE = 2
-OPTIONAL_DISTANCE_MODE = 4
+OPTIONAL_DISTANCE_MODE = 3
 
 time_list = []
 fitness_list = []
@@ -145,9 +152,7 @@ count_mode3_list = []
 before_fitness = 0
 small_count = 0
 if __name__ == "__main__":
-    if not prior_condition_check():
-        raise Exception("repair condition")
-    else: print('=' * 75)
+    description = prior_condition_check()
 
     count_mode3 = 0
     time_arr3 = np.zeros((N + 1, N + 1))
@@ -161,20 +166,20 @@ if __name__ == "__main__":
         df = abs(current_fitness - before_fitness)
         if df == 0:
             small_count += 1
-            if small_count > 3:
-                if fitness_mode > 1:
-                    fitness_mode = 1
-                    small_count = 0
-                else:
-                    break
+            if small_count > 3 and fitness_mode > 1:
+                fitness_mode = 1
+                small_count = 0
+            elif small_count > 100 and fitness_mode <= 1:
+                break
         fitness_list.append(current_fitness)
         count_mode3_list.append(count_mode3)
         before_fitness = current_fitness
     t2 = time.time()
 
-    #delta_time = t2 - t1 + 0.3 * count_mode3
-    delta_time = utill.caculate_running_time(time_arr3, ga.time_arr)
-    print(fitness_list)
+    if map_name == "data/data_Rtype.pickle":
+        delta_time = t2 - t1 + 0.3 * count_mode3
+    elif map_name == 'data/data_Ctype.pickle':
+        delta_time = utill.caculate_running_time(time_arr3, ga.time_arr)
 
     print('time :', delta_time)
     print('fitness :', ga.population[0].fitness)
@@ -182,9 +187,7 @@ if __name__ == "__main__":
     print('-' * 75)
 
     import pickle
-    if input('save?') == 'Y':
+
+    if input('save? :') == 'Y':
         with open(SAVE_FILE, "wb") as fw:
-            description = "N25 M5 C30 Rtype BASIC2 OPTIONAL4 method4, generation_goal = 500, population_size = 20"
-            description += "\n0번인덱스 : description, 1번 인덱스 : 걸린 시간, 2번 인덱스 : generation에 따른 최적"
-            description += " fitness 3번 인덱스 : generation에 따른 count_mode3"
-            pickle.dump([description, delta_time, fitness_list, count_mode3_list], fw)
+            pickle.dump([description, time_list, fitness_list, count_mode3_list], fw)

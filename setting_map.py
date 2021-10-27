@@ -43,6 +43,10 @@ class Map:
         with open("data/data_first.pickle", "wb") as fw:
             pickle.dump(self.map, fw)
 
+    def load_map(self, map_name):
+        with open(map_name, "rb") as fr:
+            self.map = pickle.load(fr)
+
     def map_plot(self):
         x_list, y_list =[x for x,y in self.map], [y for x,y in self.map]
         plt.title('Map')
@@ -64,7 +68,8 @@ class Map:
 
 if __name__ == "__main__":
     m = Map(5, 1000, "R")
-    m.create_map()
+    #m.create_map()
+    m.load_map('data/data_Ctype.pickle')
     m.print_map()
     m.map_plot()
     if input("save? : ") == "Y":
